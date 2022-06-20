@@ -21,6 +21,7 @@ jobs:
         uses: alphayax/appscan-sast-action@v1
         with:
           #target: http://demo.testfire.net/
+          #needs
           api-secret: "${{secrets.ASOC_SECRET}}"
           api-id: "${{secrets.ASOC_KEY}}"
           application-id: "cccb700c-1188-44e6-9d05-b5a287d1eca2"
