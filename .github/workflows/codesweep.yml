@@ -27,7 +27,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}} 
           # ASoC -  Download the latest version of SAClientUtil to generate the .irx in preparation for the scan
-          Write-Host "Downloading latest verion of SAClientUtil..."
           Invoke-WebRequest -Uri "https://cloud.appscan.com/api/Local/StaticAnalyzer/ARSATool" -OutFile "saclientutil.zip"
           Expand-Archive -Path "saclientutil.zip" -DestinationPath "saclientutil"
           $SAClientUtilFolder = Get-ChildItem -Path .\saclientutil
