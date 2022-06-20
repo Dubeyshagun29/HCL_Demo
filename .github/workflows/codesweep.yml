@@ -5,20 +5,21 @@ jobs:
     runs-on: ubuntu-latest
     name: Run unit tests and SAST scan on the source code
     steps:
-      - uses: actions/checkout@v1
-      - name: Run AppScan CodeSweep
-        uses: HCL-TECH-SOFTWARE/appscan-codesweep-action@v2
-        with:
-          asoc_key: ${{secrets.ASOC_KEY}}
-          asoc_secret: ${{secrets.ASOC_SECRET}}
-    env:
-      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      uses: alphayax/appscan-sast-action@v1     
+      #- uses: actions/checkout@v1
+      #- name: Run AppScan CodeSweep
+      #  uses: HCL-TECH-SOFTWARE/appscan-codesweep-action@v2
+      #  with:
+      #    asoc_key: ${{secrets.ASOC_KEY}}
+      #    asoc_secret: ${{secrets.ASOC_SECRET}}
+    #env:
+      #GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}  
   #needs: build
-  name: Run the SAST scan on the source code
-  steps:
-    uses: alphayax/appscan-sast-action@v1
-    with:
-      api-secret: "${{secrets.ASOC_SECRET}}"
-      api-id: "${{secrets.ASOC_KEY}}"
-      application-id: "cccb700c-1188-44e6-9d05-b5a287d1eca2"
+  #name: Run the SAST scan on the source code
+  #steps:
+      - uses: alphayax/appscan-sast-action@v1
+        with:
+          api-secret: "${{secrets.ASOC_SECRET}}"
+          api-id: "${{secrets.ASOC_KEY}}"
+          application-id: "cccb700c-1188-44e6-9d05-b5a287d1eca2"
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}} 
