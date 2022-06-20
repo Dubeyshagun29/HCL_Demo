@@ -28,7 +28,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   zap_scan:
     runs-on: ubuntu-latest
-    needs: security
+    #needs: security
     name: Run DAST scan on the web application
     steps:
         - name: Checkout
