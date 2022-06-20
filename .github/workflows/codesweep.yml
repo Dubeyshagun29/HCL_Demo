@@ -16,9 +16,9 @@ jobs:
       uses: alphayax/appscan-sast-action@v1
 security:      
   runs-on: ubuntu-latest
-    needs: build
-    name: Run the SAST scan on the source code
-    steps:
+  needs: build
+  name: Run the SAST scan on the source code
+  steps:
     uses: alphayax/appscan-sast-action@v1
     with:
       api-secret: "${{secrets.ASOC_SECRET}}"
