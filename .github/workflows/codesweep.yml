@@ -13,9 +13,7 @@ jobs:
           asoc_secret: ${{secrets.ASOC_SECRET}}
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      uses: alphayax/appscan-sast-action@v1
-security:      
-  runs-on: ubuntu-latest
+      uses: alphayax/appscan-sast-action@v1     
   #needs: build
   name: Run the SAST scan on the source code
   steps:
