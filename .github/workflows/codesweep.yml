@@ -27,8 +27,6 @@ jobs:
           uses: alphayax/appscan-dast-action@v2
           with:
             target: http://demo.testfire.net/
-              username: "admin"
-              password: "admin"
             api-secret: "${{secrets.ASOC_SECRET}}"
             api-id: "${{secrets.ASOC_KEY}}"
             application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
