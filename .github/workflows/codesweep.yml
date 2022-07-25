@@ -14,22 +14,23 @@ jobs:
           application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    name: "DAST scan"
-    on: push
-    jobs:
-      build:
-        runs-on: ubuntu-latest
-        name: Run unit tests and DAST scan on the target url
-        steps:
-          - uses: actions/checkout@v2
-          - name: Run AppScan CodeSweep
-            uses: alphayax/appscan-dast-action@v2
-            with:
-              target: http://demo.testfire.net/
-              user id: admin
-              password: admin
-              api-secret: "${{secrets.ASOC_SECRET}}"
-              api-id: "${{secrets.ASOC_KEY}}"
-              application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
-            env:
-              GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+name: "DAST scan"
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Run unit tests and DAST scan on the target url
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run AppScan CodeSweep
+        uses: alphayax/appscan-dast-action@v2
+        with:
+          target: http://demo.testfire.net/
+            user id: admin
+            password: admin
+          api-secret: "${{secrets.ASOC_SECRET}}"
+          api-id: "${{secrets.ASOC_KEY}}"
+          application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
