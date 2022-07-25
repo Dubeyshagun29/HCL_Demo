@@ -53,9 +53,9 @@ jobs:
       runs-on: ubuntu-latest
       name: Run unit tests and DAST scan on the target url
       steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Run AppScan CodeSweep
-        uses: alphayax/appscan-dast-action@v1
+        uses: alphayax/appscan-dast-action@v2
         with:
           target: http://demo.testfire.net/
           user id: admin
