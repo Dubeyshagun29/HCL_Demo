@@ -15,21 +15,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-  ASOC DAST scan
-  on: push
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      name: Run unit tests and DAST scan on the target url
-      steps:
-        - uses: actions/checkout@v2
-        - name: Run AppScan CodeSweep
-          with:
-            target: http://demo.testfire.net/
-            user-id: "admin"
-            password: "admin"
-            api-secret: "${{secrets.ASOC_SECRET}}"
-            api-id: "${{secrets.ASOC_KEY}}"
-            application-id: "b05d53a3-3c6d-4b93-a764-510916539af2"
-          env:
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+ASOC_DAST scan
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Run unit tests and DAST scan on the target url
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run AppScan CodeSweep
+        uses: alphayax/appscan-dast-action@v1
+      with:
+        target: http://demo.testfire.net/
+          user-id: "admin"
+          password: "admin"
+        api-secret: "${{secrets.ASOC_SECRET}}"
+        api-id: "${{secrets.ASOC_KEY}}"
+        application-id: "b05d53a3-3c6d-4b93-a764-510916539af2"
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
