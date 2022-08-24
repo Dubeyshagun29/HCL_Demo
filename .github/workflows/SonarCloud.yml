@@ -3,6 +3,7 @@ name: Run SonarQube with Maven
 on: push
 
 jobs:
+#needs: security
   build:
     runs-on: ubuntu-latest
     steps:
