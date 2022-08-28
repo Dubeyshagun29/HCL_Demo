@@ -1,32 +1,53 @@
-name: "SAST scan"
-on: push
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    name: Run unit tests and SAST scan on the source code
-    steps:
-      - uses: actions/checkout@v1
-      - name: Run AppScan CodeSweep
-        uses: alphayax/appscan-sast-action@v1
-        with:
-          api-secret: "${{secrets.ASOC_SECRET}}"
-          api-id: "${{secrets.ASOC_KEY}}"
-          application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  zap_scan:
-    runs-on: ubuntu-latest
+#name: "SAST scan"
+#on: push
+#jobs:
+  #build:
+    #runs-on: ubuntu-latest
+    #name: Run unit tests and SAST scan on the source code
+    #steps:
+      #- uses: actions/checkout@v1
+      #- name: Run AppScan CodeSweep
+        #uses: alphayax/appscan-sast-action@v1
+        #with:
+          #api-secret: "${{secrets.ASOC_SECRET}}"
+          #api-id: "${{secrets.ASOC_KEY}}"
+          #application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
+        #env:
+          #GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  #zap_scan:
+    #runs-on: ubuntu-latest
     #needs: security
-    name: Run DAST scan on the web application
-    steps:
-        - name: Checkout
-          uses: actions/checkout@v2
+    #name: Run DAST scan on the web application
+    #steps:
+        #- name: Checkout
+          #uses: actions/checkout@v2
           #with:
           #  ref: master
-        - name: ZAP Scan
-          uses: zaproxy/action-baseline@v0.6.1
-          with:
-            docker_name: 'owasp/zap2docker-stable'
-            target: 'http://demo.testfire.net/'
-            rules_file_name: '.zap/rules.tsv'
-            cmd_options: '-a'
+        #- name: ZAP Scan
+          #uses: zaproxy/action-baseline@v0.6.1
+          #with:
+            #docker_name: 'owasp/zap2docker-stable'
+            #target: 'http://demo.testfire.net/'
+            #rules_file_name: '.zap/rules.tsv'
+            #cmd_options: '-a'
+name: SonarCloud Build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+              run:  sonar:sonar -Dsonar.projectKey=javaprojectrecachability -Dsonar.organization=javaprojectrecachability -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
