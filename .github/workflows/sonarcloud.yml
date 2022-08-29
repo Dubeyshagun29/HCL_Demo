@@ -1,4 +1,4 @@
-name: "SonarCloud analysis"
+name: SonarCloud analysis
 on: push
 jobs:
   sonarcloud:
