@@ -12,16 +12,19 @@ jobs:
         #  fetch-depth: 0
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: my-custom-directory
       
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
           with:
             #projectBaseDir: C:/Users/Shagun Dubey/OneDrive/Desktop/AltoroJ-AltoroJ-3.2/HCL_Demo/HCL_Demo/AltoroJ-AltoroJ-3.2
+       
              # args: >
-              -Dsonar.projectKey=dubeyshagun29
-              -Dsonar.organization=Dubeyshagun29_HCL_Demo
-              -Dsonar.host.url=https://sonarcloud.io
+                -Dsonar.projectKey=dubeyshagun29
+                -Dsonar.organization=Dubeyshagun29_HCL_Demo
+              #-Dsonar.host.url=https://sonarcloud.io
             
  
 
