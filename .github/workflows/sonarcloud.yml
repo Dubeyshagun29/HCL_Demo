@@ -13,7 +13,7 @@ jobs:
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
-          projectBaseDir: https://github.com/Dubeyshagun29/HCL_Demo.git/AltoroJ-AltoroJ-3.2/
+          projectBaseDir: Dubeyshagun29/HCL_Demo/AltoroJ-AltoroJ-3.2/
       
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
