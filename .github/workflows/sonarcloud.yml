@@ -13,7 +13,7 @@ jobs:
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
-          projectBaseDir: github/workspace/Dubeyshagun29/HCL_Demo/AltoroJ-AltoroJ-3.2
+          projectBaseDir: github/workspace/Dubeyshagun29/
           
           args: >
                 -Dsonar.projectKey=dubeyshagun29
