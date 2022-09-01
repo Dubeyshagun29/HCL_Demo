@@ -13,7 +13,7 @@ jobs:
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
-          projectBaseDir: https://sonarcloud.io/project/configuration?id=Dubeyshagun29_HCL_Demo&analysisMode=GitHubActions
+          projectBaseDir: https://github.com/Dubeyshagun29/HCL_Demo
           
           args: >
                 -Dsonar.projectKey=dubeyshagun29
