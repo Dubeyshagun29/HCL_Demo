@@ -14,7 +14,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        projectBaseDir: /opt/sonar-scanner/output
+        #projectBaseDir: /opt/sonar-scanner/output
         args: >
           -Dsonar.organization=dubeyshagun29
           -Dsonar.projectKey=Dubeyshagun29_HCL_Demo
