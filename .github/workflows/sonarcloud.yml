@@ -14,7 +14,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        projectBaseDir: C:/Users/ShagunDubey/Newfolder/HCL_Demo/AltoroJ-AltoroJ-3.2
+        projectBaseDir: https://github.com/Dubeyshagun29/HCL_Demo/tree/main/AltoroJ-AltoroJ-3.2
         args: >
           -Dsonar.organization=dubeyshagun29
           -Dsonar.projectKey=Dubeyshagun29_HCL_Demo
