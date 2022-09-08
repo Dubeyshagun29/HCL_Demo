@@ -1,7 +1,5 @@
-push:
-    branches:
-      - master
 name: Main Workflow
+on: push
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
