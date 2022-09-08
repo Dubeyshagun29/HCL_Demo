@@ -8,15 +8,17 @@ jobs:
       - name: Analyze with SonarCloud
         uses: actions/checkout@v2
         with:
-          #Disbaled shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+      #- name: SonarCloud Scan
+        #uses: sonarsource/sonarcloud-github-action@master
 
         #with:
           #projectBaseDir: "C:/Users/ShagunDubey/New folder/HCL_Demo"
-          
-          args:>
+          - name: Analyze with SonarCloud
+            uses: sonarsource/sonarcloud-github-action@master
+            with:
+              projectBaseDir: C:/Users/ShagunDubey/New folder/HCL_Demo
+              args: >
                 -Dsonar.projectKey=Dubeyshagun29_HCL_Demo
                 -Dsonar.organization=dubeyshagun29
                 -Dsonar.host.url=https://sonarcloud.io
