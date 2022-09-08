@@ -12,10 +12,9 @@ jobs:
         #  fetch-depth: 0
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
-          run:verify sonar:sonar -Dsonar.projectKey=dubeyshagun29 -Dsonar.organization=Dubeyshagun29_HCL_Demo -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
 
-        #with:
-          #projectBaseDir: Dubeyshagun29/HCL_Demo
+        with:
+          projectBaseDir: "C:\Users\Shagun Dubey\OneDrive\Desktop\AltoroJ-AltoroJ-3.2\HCL_Demo"
           
           #args:>
                 #-Dsonar.projectKey=dubeyshagun29
