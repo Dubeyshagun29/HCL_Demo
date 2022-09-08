@@ -14,7 +14,7 @@ jobs:
         uses: sonarsource/sonarcloud-github-action@master
 
         with:
-          projectBaseDir: "C:\Users\Shagun Dubey\OneDrive\Desktop\AltoroJ-AltoroJ-3.2\HCL_Demo"
+          projectBaseDir: "C:/Users/ShagunDubey/OneDrive/Desktop/AltoroJ-AltoroJ-3.2/HCL_Demo"
           
           #args:>
                 #-Dsonar.projectKey=dubeyshagun29
