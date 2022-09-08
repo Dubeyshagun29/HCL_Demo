@@ -21,3 +21,4 @@ jobs:
           -Dsonar.sources=.
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.exclusions=**/obj/**,**/*.dll
+          -Dsonar.java.binaries=https://github.com/Dubeyshagun29/HCL_Demo/tree/main/AltoroJ-AltoroJ-3.2/WebContent/
