@@ -43,7 +43,7 @@ function StateChangeForJSON()
 		var jsonFetchHostName=jsonObj["HostName"];
 		//get JSON values and output
 		x=document.getElementById('FetchHostName');
-		x.innerHTML=jsonFetchHostName;
+		x.textContent = jsonFetchHostName;
 		x=document.getElementById('FetchHostStatus');
 		x.innerHTML=jsonFetchHostStatus;
 	}
