@@ -3,6 +3,7 @@
   response.setHeader("Content-Security-Policy", "default-src 'self'");
   response.setHeader("X-XSS-Protection", "1; mode=block");
   response.setHeader("X-Content-Type-Options", "nosniff");
+  response.addCookie(new Cookie("cookieName", "cookieValue"){{setSecure(true);setHttpOnly(true);setPath("/");setSameSite("Strict");}}); 
 %>
 /**
 
