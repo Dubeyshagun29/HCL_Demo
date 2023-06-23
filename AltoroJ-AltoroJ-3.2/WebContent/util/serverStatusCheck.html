@@ -45,33 +45,33 @@ function StateChangeForJSON()
 		x=document.getElementById('FetchHostName');
 		x.textContent = jsonFetchHostName;
 		x=document.getElementById('FetchHostStatus');
-		x.innerHTML=jsonFetchHostStatus;
+		x.textContent=jsonFetchHostStatus;
 	}
 	else if(xmlHttp.readyState == 4 && xmlHttp.status == 500)
 	{
 		x=document.getElementById('FetchHostName');
-		x.innerHTML=sLastHostName;
+		x.textContent=sLastHostName;
 		x=document.getElementById('FetchHostStatus');
 		x.innerHTML='The service returned an error. Please be patient while our administrators fix the issue.';
 	}
 	else if(xmlHttp.readyState == 4 && xmlHttp.status == 404)
 	{
 		x=document.getElementById('FetchHostName');
-		x.innerHTML=sLastHostName;
+		x.textContent=sLastHostName;
 		x=document.getElementById('FetchHostStatus');
 		x.innerHTML='The service returned an error. The status service appears to not be available';
 	}
 	else if(xmlHttp.readyState == 4 && xmlHttp.status == 401)
 	{
 		x=document.getElementById('FetchHostName');
-		x.innerHTML=sLastHostName;
+		x.textContent=sLastHostName;
 		x=document.getElementById('FetchHostStatus');
 		x.innerHTML='The service returned a 401 unauthorized error, indicating it was implemented incorrectly';
 	}
 	else if(xmlHttp.readyState == 4 && xmlHttp.status == 302)
 	{
 		x=document.getElementById('FetchHostName');
-		x.innerHTML=sLastHostName;
+		x.textContent=sLastHostName;
 		x=document.getElementById('FetchHostStatus');
 		x.innerHTML='The service returned a 302 redirect, indicating it was implemented incorrectly';
 	}
