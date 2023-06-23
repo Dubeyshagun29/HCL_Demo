@@ -29,7 +29,7 @@ IBM AltoroJ
 		<div class="fl" style="width: 99%;">
 		
 		<%
-			String content = request.getParameter("content");
+			String encodedContent = Encoder.forHtmlContent(Encoder.forHtml(request.getParameter("content")));
 			if (content != null && !content.equalsIgnoreCase("customize.jsp")){
 				if (content.startsWith("http://") || content.startsWith("https://")){
 					response.sendRedirect(content);
