@@ -30,7 +30,10 @@ jobs:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           codeScanningAlerts: true
           githubToken: ${{ github.token }}
-
+          
+outputFile: hawkscan-report.json  # ✅ Ensures the report is saved
+continue-on-error: false  # ✅ Prevents next steps if scan fails
+  
       - name: Convert StackHawk Report to GitHub Issues
         uses: JasonEtco/create-an-issue@v2
         with:
