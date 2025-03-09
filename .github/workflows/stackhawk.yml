@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4  # ✅ Updated to latest version
 
       - name: Run HawkScan
-        uses: stackhawk/hawkscan-action@v2
+        uses: .hawk/stackhawk.yml/hawkscan-action@v2
         continue-on-error: false  # ✅ Prevents next steps if scan fails
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
