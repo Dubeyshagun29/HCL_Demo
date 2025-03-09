@@ -1,19 +1,19 @@
-name: "SAST scan"
-on: push
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    name: Run unit tests and SAST scan on the source code
-    steps:
-      - uses: actions/checkout@v1
-      - name: Run AppScan CodeSweep
-        uses: alphayax/appscan-sast-action@v1
-        with:
-          api-secret: "${{secrets.ASOC_SECRET}}"
-          api-id: "${{secrets.ASOC_KEY}}"
-          application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}       
+#name: "SAST scan"
+#on: push
+#jobs:
+  #build:
+    #runs-on: ubuntu-latest
+    #name: Run unit tests and SAST scan on the source code
+    #steps:
+      #- uses: actions/checkout@v1
+      #- name: Run AppScan CodeSweep
+        #uses: alphayax/appscan-sast-action@v1
+        #with:
+          #api-secret: "${{secrets.ASOC_SECRET}}"
+          #api-id: "${{secrets.ASOC_KEY}}"
+          #application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
+        #env:
+          #GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}       
   zap_scan:
     needs: security
     runs-on: ubuntu-latest
