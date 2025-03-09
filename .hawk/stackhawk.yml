@@ -1,1 +1,45 @@
+name: "StackHawk"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  #schedule:
+    #- cron: '33 14 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  stackhawk:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for stackhawk/hawkscan-action to upload code scanning alert info
+    name: StackHawk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  # ✅ Updated to latest version
+
+      - name: Run HawkScan
+        uses: .hawk/stackhawk.yml/hawkscan-action@v2
+        continue-on-error: false  # ✅ Prevents next steps if scan fails
+        with:
+          apiKey: ${{ secrets.HAWK_API_KEY }}
+          codeScanningAlerts: true
+          githubToken: ${{ github.token }}
+          outputFile: hawkscan-report.json  # ✅ Ensures the report is saved
+
+      - name: Debug:Check if StackHawk Report Exists
+        run: ls -al && cat hawkscan-report.json || echo "StackHawk report not found"
+
+      - name: Convert StackHawk Report to GitHub Issues
+        if: success()  # ✅ Only runs if the previous step succeeded
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: hawkscan-report.json  # ✅ Ensure this file is generated from the StackHawk scan
+          update_existing: true  # ✅ Avoids duplicate issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ✅ Use GitHub Token as an environment variable
 
