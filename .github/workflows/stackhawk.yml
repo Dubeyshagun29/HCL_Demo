@@ -59,3 +59,9 @@ jobs:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           codeScanningAlerts: true
           githubToken: ${{ github.token }}
+
+      - name: Convert StackHawk Report to GitHub Issues
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: hawkscan-report.json  # Ensure this file is saved from StackHawk
+          token: ${{ secrets.GITHUB_TOKEN }}
