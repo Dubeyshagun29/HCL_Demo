@@ -45,7 +45,7 @@ jobs:
           target: "http://localhost:8080"
 
       - name: Upload Security Reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Security-Reports
           path: ./reports/
