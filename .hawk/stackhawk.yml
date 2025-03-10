@@ -1,6 +1,6 @@
 app:
   applicationId: "2d2a98f9-63e8-4559-8526-3e2cd80f750d"  # ✅ Replace with your actual StackHawk App ID
-  host: "https://demo.testfire.net"  # ✅ Replace with your actual app URL
+  host: "http://localhost:8080"  # ✅ Replace with your actual app URL
   env: "DEVELOPMENT"  # ✅ Change based on environment
 
 hawk:
