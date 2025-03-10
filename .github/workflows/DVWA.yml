@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   security-tests:
@@ -45,6 +46,7 @@ jobs:
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           codeScanningAlerts: true
+
           githubToken: ${{ github.token }}
           configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
 
