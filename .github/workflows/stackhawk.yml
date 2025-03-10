@@ -29,15 +29,3 @@ jobs:
           codeScanningAlerts: true
           githubToken: ${{ github.token }}
           configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
-
-      - name: Debug:Check if StackHawk Report Exists
-        run: ls -al && cat hawkscan-report.json || echo "StackHawk report not found"
-
-      - name: Convert StackHawk Report to GitHub Issues
-        if: success()  # ✅ Runs only if the previous step succeeded
-        uses: JasonEtco/create-an-issue@v2
-        with:
-          filename: hawkscan-report.json  # ✅ Ensure this file is generated from StackHawk scan
-          update_existing: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
