@@ -1,44 +1,43 @@
-name: "StackHawk"
+name: "Security Scans"
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  #schedule:
-    #- cron: '33 14 * * 1'
+  workflow_dispatch:  # ✅ Allows manual execution
 
 permissions:
   contents: read
 
 jobs:
-  stackhawk:
+  security-scans:
     permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for stackhawk/hawkscan-action to upload code scanning alert info
-    name: StackHawk
+      contents: read
+      security-events: write
+    name: Security Scans
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # ✅ Updated to latest version
+        uses: actions/checkout@v4  # ✅ Ensures repo is pulled correctly
 
-      - name: Run HawkScan
-        uses: .hawk/stackhawk.yml/hawkscan-action@v2
-        continue-on-error: false  # ✅ Prevents next steps if scan fails
+      - name: Run HawkScan (StackHawk DAST)
+        uses: stackhawk/hawkscan-action@v2
+        continue-on-error: false  # ✅ Stops if the scan fails
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           codeScanningAlerts: true
           githubToken: ${{ github.token }}
-          outputFile: hawkscan-report.json  # ✅ Ensures the report is saved
+          configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
 
       - name: Debug:Check if StackHawk Report Exists
         run: ls -al && cat hawkscan-report.json || echo "StackHawk report not found"
 
       - name: Convert StackHawk Report to GitHub Issues
-        if: success()  # ✅ Only runs if the previous step succeeded
+        if: success()  # ✅ Runs only if the previous step succeeded
         uses: JasonEtco/create-an-issue@v2
         with:
-          filename: hawkscan-report.json  # ✅ Ensure this file is generated from the StackHawk scan
-          update_existing: true  # ✅ Avoids duplicate issues
+          filename: hawkscan-report.json  # ✅ Ensure this file is generated from StackHawk scan
+          update_existing: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ✅ Use GitHub Token as an environment variable
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
