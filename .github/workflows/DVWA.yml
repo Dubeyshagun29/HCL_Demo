@@ -20,7 +20,7 @@ jobs:
           - 8080:80  # ✅ Exposes DVWA on port 8080
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4  # ✅ Pulls your GitHub repo code
+        uses: actions/checkout@v2  # ✅ Pulls your GitHub repo code
 
       - name: Wait for DVWA to Start
         run: sleep 30  # ✅ Ensures DVWA is fully running before scanning
@@ -45,7 +45,7 @@ jobs:
           target: "http://localhost:8080"
 
       - name: Upload Security Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: Security-Reports
           path: ./reports/
