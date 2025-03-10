@@ -39,11 +39,14 @@ jobs:
             -Dsonar.java.binaries=.
 
 
-      - name: Run StackHawk Scan (DAST)
+      - name: Run HawkScan (StackHawk DAST)
         uses: stackhawk/hawkscan-action@v2
+        continue-on-error: false  # ✅ Stops if the scan fails
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
-          configurationFiles: "stackhawk.yml"
+          codeScanningAlerts: true
+          githubToken: ${{ github.token }}
+          configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
 
 
       - name: Run OWASP ZAP Scan (DAST)
