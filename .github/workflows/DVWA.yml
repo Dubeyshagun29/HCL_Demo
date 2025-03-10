@@ -52,13 +52,6 @@ jobs:
       - name: Wait for StackHawk Report
         run: sleep 240  # ⏳ Waits for 4 minutes (240 seconds)
 
-      - name: Upload SARIF Results to GitHub
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: hawkscan-report.sarif  # ✅ Ensure this file exists
-          token: ${{ secrets.GITHUB_TOKEN }}  # ✅ Required for SARIF upload
-
-
 
       - name: Run OWASP ZAP Scan (DAST)
         uses: zaproxy/action-full-scan@v0.5.0
@@ -67,6 +60,7 @@ jobs:
           docker_name: "mrlucasfreitas/zaproxy-full-scan:3.0"  # ✅ Correct OWASP ZAP image
           allow_issue_writing: false
           issue_title: "OWASP ZAP Scan Results"
+          
 
 
       - name: Upload Security Reports
