@@ -42,40 +42,34 @@ jobs:
             -Dsonar.security.report.cve=true
 
       - name: Extract CVE IDs from SonarCloud Report
-        run: |
-          curl -s -u "${{ secrets.SONAR_TOKEN }}:" "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" > sonar_issues.json
+  run: |
+    curl -s -u "${{ secrets.SONAR_TOKEN }}:" "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" > sonar_issues.json
 
-          echo "Filtering CVE-mapped vulnerabilities..."
-          python3 << EOF
-          import json
+    echo "Filtering CVE-mapped vulnerabilities..."
+    python3 <<EOF
+    import json
 
-          continue-on-error:
-            data = json.load(file)
+# Read SonarCloud JSON file
+with open("sonar_issues.json", "r") as file:
+    data = json.load(file)
 
-          vulnerabilities = []
-        working-directory:
-          cve_refs = [ref for ref in issue.get("tags", []) if ref.startswith("cve-")]
-        if:
-            vulnerabilities.append({
-                "rule":issue["rule"],
-                "component":issue["component"],
-                "cve":cve_refs,
-                "severity":issue["severity"]
-            })
-  
-          continue-on-error:
-            json.dump(vulnerabilities, output, indent=4)
+vulnerabilities = []
+for issue in data.get("issues", []):
+        cve_refs = [ref for ref in issue.get("tags", []) if ref.startswith("cve-")]
+    if cve_refs:  # Ensure valid condition
+        vulnerabilities.append({
+            "rule": issue["rule"],
+            "component": issue["component"],
+            "cve": cve_refs,
+            "severity": issue["severity"]
+        })
 
-          print(f"Extracted {len(vulnerabilities)} CVE-mapped vulnerabilities.")
-          EOF
+# Save extracted CVE vulnerabilities to a JSON file
+with open("reports/sonarqube_cve_mapped.json", "w") as output:
+    json.dump(vulnerabilities, output, indent=4)
 
-      - name: Upload SonarCloud CVE Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: sonarcloud_cve_report
-          path: Reports/sonarqube_cve_mapped.json
-
-
+print(f"Extracted {len(vulnerabilities)} CVE-mapped vulnerabilities.")
+EOF
 
       - name: Run HawkScan (StackHawk DAST)
         uses: stackhawk/hawkscan-action@v2
