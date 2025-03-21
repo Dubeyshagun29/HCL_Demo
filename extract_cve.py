@@ -1,7 +1,7 @@
 import json
 import os
 
-# Ensure 'reports/' directory exists
+# Ensure reports directory exists
 os.makedirs("reports", exist_ok=True)
 
 # Read SonarCloud JSON file
@@ -10,14 +10,12 @@ with open("sonar_issues.json", "r") as file:
 
 vulnerabilities = []
 for issue in data.get("issues", []):
-    vulnerabilities.append({
-        "rule": issue["rule"],
-        "component": issue["component"],
-        "severity": issue["severity"]
-    })
+    vulnerabilities.append(f"- **Rule**: {issue['rule']}\n  - **Component**: {issue['component']}\n  - **Severity**: {issue['severity']}")
 
-# Save extracted CVE vulnerabilities to a JSON file
-with open("reports/sonarqube_cve_mapped.json", "w") as output:
-    json.dump(vulnerabilities, output, indent=4)
+# Save extracted CVEs to a Markdown file for GitHub Issue
+issue_body = "## 🛑 SonarCloud CVE Report\n\n" + "\n".join(vulnerabilities)
 
-print("✅ CVE-mapped vulnerabilities saved successfully!")
+with open("reports/sonarqube_cve_report.md", "w") as output:
+    output.write(issue_body)
+
+print("✅ CVE report formatted for GitHub Issues.")
