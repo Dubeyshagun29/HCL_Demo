@@ -42,34 +42,11 @@ jobs:
             -Dsonar.security.report.cve=true
 
       - name: Extract CVE IDs from SonarCloud Report
-  run: |
-    curl -s -u "${{ secrets.SONAR_TOKEN }}:" "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" > sonar_issues.json
+        run: |
+          curl -s -u "${{ secrets.SONAR_TOKEN }}" "https://sonarcloud.io/api/issues/search?componentKeys=Dub..." -o sonar_issues.json
+          echo "Filtering CVE-mapped vulnerabilities..."
+          python3 extract_cve.py
 
-    echo "Filtering CVE-mapped vulnerabilities..."
-    python3 <<EOF
-    import json
-
-# Read SonarCloud JSON file
-with open("sonar_issues.json", "r") as file:
-    data = json.load(file)
-
-vulnerabilities = []
-for issue in data.get("issues", []):
-        cve_refs = [ref for ref in issue.get("tags", []) if ref.startswith("cve-")]
-    if cve_refs:  # Ensure valid condition
-        vulnerabilities.append({
-            "rule": issue["rule"],
-            "component": issue["component"],
-            "cve": cve_refs,
-            "severity": issue["severity"]
-        })
-
-# Save extracted CVE vulnerabilities to a JSON file
-with open("reports/sonarqube_cve_mapped.json", "w") as output:
-    json.dump(vulnerabilities, output, indent=4)
-
-print(f"Extracted {len(vulnerabilities)} CVE-mapped vulnerabilities.")
-EOF
 
       - name: Run HawkScan (StackHawk DAST)
         uses: stackhawk/hawkscan-action@v2
