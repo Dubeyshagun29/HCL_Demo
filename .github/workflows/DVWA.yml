@@ -42,6 +42,8 @@ jobs:
             -Dsonar.security.report.cve=true
 
       - name: Extract CVE IDs from SonarCloud Report
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mkdir -p reports # ✅ Ensure the directory exists
           curl -s -u "$SONAR_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=Dub..." -o sonar_issues.json
