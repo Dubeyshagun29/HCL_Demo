@@ -10,6 +10,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  issues: write
 
 jobs:
   security-tests:
@@ -53,13 +54,13 @@ jobs:
 
       - name: Create GitHub Issue for CVE Report
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for GitHub API
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ✅ Use correct token
         run: |
-          REPORT_BODY=$(cat reports/sonarqube_cve_report.md)
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/issues \
-            -d "{\"title\": \"🚨 SonarCloud CVE Report\", \"body\": \"$REPORT_BODY\"}"
+            REPORT_BODY=$(cat reports/sonarqube_cve_report.md)
+            curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ github.repository }}/issues \
+              -d "{\"title\": \"🚨 SonarCloud CVE Report\", \"body\": \"$REPORT_BODY\"}"
 
 
       - name: Run HawkScan (StackHawk DAST)
