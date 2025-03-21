@@ -43,7 +43,8 @@ jobs:
 
       - name: Extract CVE IDs from SonarCloud Report
         run: |
-          curl -s -u "${{ secrets.SONAR_TOKEN }}" "https://sonarcloud.io/api/issues/search?componentKeys=Dub..." -o sonar_issues.json
+          mkdir -p reports # ✅ Ensure the directory exists
+          curl -s -u "$SONAR_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=Dub..." -o sonar_issues.json
           echo "Filtering CVE-mapped vulnerabilities..."
           python3 extract_cve.py
 
