@@ -44,11 +44,22 @@ jobs:
       - name: Extract CVE IDs from SonarCloud Report
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to create issues
         run: |
           mkdir -p reports # ✅ Ensure the directory exists
           curl -s -u "$SONAR_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=Dub..." -o sonar_issues.json
           echo "Filtering CVE-mapped vulnerabilities..."
           python3 extract_cve.py
+
+      - name: Create GitHub Issue for CVE Report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for GitHub API
+        run: |
+          REPORT_BODY=$(cat reports/sonarqube_cve_report.md)
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues \
+            -d "{\"title\": \"🚨 SonarCloud CVE Report\", \"body\": \"$REPORT_BODY\"}"
 
 
       - name: Run HawkScan (StackHawk DAST)
