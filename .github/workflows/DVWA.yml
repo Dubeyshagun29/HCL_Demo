@@ -80,7 +80,7 @@ jobs:
       # ✅ Run Python to extract CVEs
       ###############################
       - name: Run CVE Extraction Script
-        run: python3 extract_cves.py
+        run: python3 extract_cve.py
 
       #########################################
       # ✅ Create GitHub Issues with CVE Reports
