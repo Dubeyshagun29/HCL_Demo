@@ -2,6 +2,7 @@ app:
   applicationId: "2d2a98f9-63e8-4559-8526-3e2cd80f750d"
   host: "http://localhost:8080"
   env: "DEVELOPMENT"
+  CodeScanningAlerts: true  
 
 hawk:
   spider:
@@ -11,6 +12,7 @@ hawk:
   scan:
     concurrentRequests: 20
     throttlePassiveBacklog: 10000
+  
 
 # Optional – ignore login if not configured
 auth:
