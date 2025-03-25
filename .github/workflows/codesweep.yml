@@ -14,20 +14,20 @@
           #application-id: "05440f8f-1eb0-49e7-a13b-c25214e3f031"
         #env:
           ##GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}       
-  zap_scan:
-    needs: security
-    runs-on: ubuntu-latest
-    needs: security
-    name: Run DAST scan on the web application
-    steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-          with:
-            ref: master
-        - name: ZAP Scan
-          uses: zaproxy/action-baseline@v0.6.1
-          with:
-            docker_name: 'owasp/zap2docker-stable'
-            target: 'http://demo.testfire.net/'
-            rules_file_name: '.zap/rules.tsv'
-            cmd_options: '-a'
+  #zap_scan:
+    #needs: security
+    #runs-on: ubuntu-latest
+    #needs: security
+    #name: Run DAST scan on the web application
+    #steps:
+        #- name: Checkout
+          #uses: actions/checkout@v2
+          #with:
+            #ref: master
+        #- name: ZAP Scan
+          #uses: zaproxy/action-baseline@v0.6.1
+          #with:
+            #docker_name: 'owasp/zap2docker-stable'
+            #target: 'http://demo.testfire.net/'
+            #rules_file_name: '.zap/rules.tsv'
+            #cmd_options: '-a'
