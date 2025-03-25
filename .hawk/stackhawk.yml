@@ -1,6 +1,6 @@
 app:
   applicationId: "2d2a98f9-63e8-4559-8526-3e2cd80f750d"
-  host: "http://localhost"
+  host: "http://localhost:8080"
   env: "DEVELOPMENT"
 
 hawk:
