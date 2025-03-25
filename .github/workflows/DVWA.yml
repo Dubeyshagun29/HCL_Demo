@@ -23,16 +23,24 @@ jobs:
           - 8080:80
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Wait for DVWA to Start
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Wait for DVWA to start
         run: sleep 30
 
-      ########################################
-      #            SAST - SONARCLOUD         
-      ########################################
-      - name: Run SonarCloud Scan
+      ######################
+      # ✅ SAST (SonarCloud)
+      ######################
+      - name: Run SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -45,78 +53,60 @@ jobs:
             -Dsonar.security.cwe.include=true
             -Dsonar.security.report.cve=true
 
-      - name: Extract CVEs from SonarCloud Report
-  env:
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  run: |
-    mkdir -p reports
-    curl -s -u "$SONAR_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" -o sonar_issues.json
-    python3 extract_sast_cve.py
-
-
-          
-      - name: Create GitHub Issue for SonarCloud CVEs
+      - name: Download SonarCloud issues (for CVE extraction)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          BODY=$(cat reports/sonarqube_cve_report.md | jq -Rs .)
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/issues \
-            -d "{\"title\": \"🚨 SonarCloud CVE Report\", \"body\": $BODY}"
+          curl -s -u "${SONAR_TOKEN}:" \
+          "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" \
+          -o sonar_issues.json
 
-      ########################################
-      #         DAST - STACKHAWK             #
-      ########################################
-      - name: Run HawkScan (StackHawk DAST)
+      ########################
+      # ✅ DAST (StackHawk)
+      ########################
+      - name: Run StackHawk scan
         uses: stackhawk/hawkscan-action@v2
-        continue-on-error: false
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           githubToken: ${{ github.token }}
           configurationFiles: ".hawk/stackhawk.yml"
-          codeScanningAlerts: true
 
-      - name: Extract CVEs from StackHawk Report
+      - name: Wait for StackHawk report
+        run: sleep 30
+
+      ###############################
+      # ✅ Run Python to extract CVEs
+      ###############################
+      - name: Run CVE Extraction Script
+        run: python3 extract_cves.py
+
+      #########################################
+      # ✅ Create GitHub Issues with CVE Reports
+      #########################################
+      - name: Create GitHub Issue for SonarCloud CVEs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p reports
-          if [ -f ".hawk/reports/report.json" ]; then
-            cat << 'EOF' > extract_dast_cve.py
-import json
-
-with open(".hawk/reports/report.json", "r") as f:
-    data = json.load(f)
-
-vulns = []
-for vuln in data.get("vulnerabilities", []):
-    cves = vuln.get("cves", [])
-    if cves:
-        vulns.append(f"- {vuln['title']} | Severity: {vuln['severity']} | CVEs: {', '.join(cves)}")
-
-with open("reports/stackhawk_cve_report.md", "w") as f:
-    if vulns:
-        f.write("## 🔍 StackHawk CVE Report\\n\\n" + "\\n".join(vulns))
-    else:
-        f.write("No CVEs found.")
-EOF
-            python3 extract_dast_cve.py
-          else
-            echo "No StackHawk report found"
-            echo "No CVEs found." > reports/stackhawk_cve_report.md
+          if [ -f reports/sonarqube_cve_report.md ]; then
+            body=$(cat reports/sonarqube_cve_report.md)
+            gh api repos/${{ github.repository }}/issues \
+              -f title="🛑 SonarCloud CVE Report" \
+              -f body="$body"
           fi
 
       - name: Create GitHub Issue for StackHawk CVEs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BODY=$(cat reports/stackhawk_cve_report.md | jq -Rs .)
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/issues \
-            -d "{\"title\": \"🔍 StackHawk CVE Report\", \"body\": $BODY}"
+          if [ -f reports/stackhawk_cve_report.md ]; then
+            body=$(cat reports/stackhawk_cve_report.md)
+            gh api repos/${{ github.repository }}/issues \
+              -f title="🛡️ StackHawk CVE Report" \
+              -f body="$body"
+          fi
 
-
-
-      - name: Extract CVEs from SAST & DAST
-  run: |
-    python3 extract_cve_reports.py
+      - name: Upload CVE reports as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CVE-Reports
+          path: reports/
