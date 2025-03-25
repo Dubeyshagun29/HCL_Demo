@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:  # ✅ Allows manual execution from GitHub UI
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,18 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     services:
       dvwa:
-        image: vulnerables/web-dvwa  # ✅ Runs DVWA inside GitHub Actions
+        image: vulnerables/web-dvwa
         ports:
-          - 8080:80  # ✅ Exposes DVWA on port 8080
+          - 8080:80
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2  # ✅ Pulls your GitHub repo code
+        uses: actions/checkout@v2
 
       - name: Wait for DVWA to Start
-        run: sleep 30  # ✅ Ensures DVWA is fully running before scanning
+        run: sleep 30
+
+      #####################################################
+      ## SAST: SonarCloud Scan + Extract CVEs + Issue
+      #####################################################
 
       - name: Run SonarCloud Scan (SAST)
-        uses: SonarSource/sonarqube-scan-action@v5.0.0  # ✅ Use latest version
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -42,52 +47,101 @@ jobs:
             -Dsonar.security.cwe.include=true
             -Dsonar.security.report.cve=true
 
-      - name: Extract CVE IDs from SonarCloud Report
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to create issues
-        run: |
-          mkdir -p reports # ✅ Ensure the directory exists
-          curl -s -u "$SONAR_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=Dub..." -o sonar_issues.json
-          echo "Filtering CVE-mapped vulnerabilities..."
-          python3 extract_cve.py
+      - name: Extract CVEs from SonarCloud Report
+  env:
+    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  run: |
+    mkdir -p reports
+    curl -s -u "$SONAR_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" -o sonar_issues.json
 
-      - name: Create GitHub Issue for CVE Report
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ✅ Use correct token
-        run: |
-            REPORT_BODY=$(cat reports/sonarqube_cve_report.md)
-            curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/${{ github.repository }}/issues \
-              -d "{\"title\": \"🚨 SonarCloud CVE Report\", \"body\": \"$REPORT_BODY\"}"
+    echo "Filtering CVE-mapped vulnerabilities..."
+    python3 <<EOF
 
+import json
+
+with open("sonar_issues.json") as f:
+    data = json.load(f)
+
+vulns = []
+for issue in data.get("issues", []):
+    cve_refs = [t for t in issue.get("tags", []) if t.lower().startswith("cve-")]
+    if cve_refs:
+        vulns.append(f"- {issue['severity']} | {issue['rule']} ({issue['component']}): {', '.join(cve_refs)}")
+
+with open("reports/sonarqube_cve_report.md", "w") as f:
+    if vulns:
+        f.write("## 🚨 SonarCloud CVE Report\n\n" + "\n".join(vulns))
+    else:
+        f.write("No CVEs found.")
+EOF
+
+
+      - name: Create GitHub Issue for SonarCloud CVE Report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPORT_BODY=$(cat reports/sonarqube_cve_report.md)
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues \
+            -d "{\"title\": \"🚨 SonarCloud CVE Report\", \"body\": \"$REPORT_BODY\"}"
+
+      #####################################################
+      ## DAST: StackHawk Scan + Extract CVEs + Issue
+      #####################################################
 
       - name: Run HawkScan (StackHawk DAST)
         uses: stackhawk/hawkscan-action@v2
-        continue-on-error: false  # ✅ Stops if the scan fails
+        continue-on-error: false
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           codeScanningAlerts: true
-
           githubToken: ${{ github.token }}
-          configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
+          configurationFiles: ".hawk/stackhawk.yml"
+
       - name: Wait for StackHawk Report
-        run: sleep 240  # ⏳ Waits for 4 minutes (240 seconds)
+        run: sleep 240
 
+      - name: Extract CVEs from StackHawk Report
+        run: |
+          python3 <<EOF
+import json, os
 
-      ##- name: Run OWASP ZAP Scan (DAST)
-        #uses: zaproxy/action-full-scan@v0.5.0
-        #with:
-          #target: "http://localhost:8080"  # ✅ Change this to match where DVWA is running
-          #docker_name: "mrlucasfreitas/zaproxy-full-scan:3.0"  # ✅ Correct OWASP ZAP image
-          #allow_issue_writing: false
-          #issue_title: "OWASP ZAP Scan Results"
-          
+report_path = ".hawk/reports/stackhawk-report.json"
+output_path = "reports/stackhawk_cve_report.md"
 
+if not os.path.exists(report_path):
+    print("No StackHawk report found.")
+    exit(1)
 
+with open(report_path) as f:
+    data = json.load(f)
+
+vulns = []
+for finding in data.get("findings", []):
+    cve = finding.get("cve")
+    if cve:
+        vulns.append(f"- {finding['severity']} | {finding['title']}: {cve}")
+
+with open(output_path, "w") as f:
+    f.write("## 🛡️ StackHawk CVE Report\n\n" + "\n".join(vulns) if vulns else "No CVEs found.")
+EOF
+
+      - name: Create GitHub Issue for StackHawk CVE Report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPORT_BODY=$(cat reports/stackhawk_cve_report.md)
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues \
+            -d "{\"title\": \"🛡️ StackHawk CVE Report\", \"body\": \"$REPORT_BODY\"}"
+
+      #####################################################
+      ## (Optional) Upload Reports as Artifact
+      #####################################################
       - name: Upload Security Reports
         uses: actions/upload-artifact@v4
         with:
           name: Security-Reports
-          path: ./.hawk/reports/
+          path: reports/
