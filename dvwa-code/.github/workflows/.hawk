@@ -1,0 +1,56 @@
+name: "DVWA Security Testing"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:  # ✅ Allows manual execution from GitHub UI
+
+permissions:
+  contents: read
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    services:
+      dvwa:
+        image: vulnerables/web-dvwa  # ✅ Runs DVWA inside GitHub Actions
+        ports:
+          - 8080:80  # ✅ Exposes DVWA on port 8080
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4  # ✅ Pulls your GitHub repo code
+
+      - name: Wait for DVWA to Start
+        run: sleep 30  # ✅ Ensures DVWA is fully running before scanning
+
+      - name: Run SonarCloud Scan (SAST)
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectKey: Dubeyshagun29_HCL_Demo
+
+      - name: Run StackHawk Scan (DAST)
+        uses: stackhawk/hawkscan-action@v2
+        with:
+          apiKey: ${{ secrets.HAWK_API_KEY }}
+          configurationFiles: "stackhawk.yml"
+
+      - name: Run GitHub CodeQL Scan (SAST)
+        uses: github/codeql-action/analyze
+        with:
+          category: "security"
+
+      - name: Run OWASP ZAP Scan (DAST)
+        uses: zaproxy/action-full-scan@v0.5.0
+        with:
+          target: "http://localhost:8080"
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: Security-Reports
+          path: ./reports/
+

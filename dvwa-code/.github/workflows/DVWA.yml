@@ -1,0 +1,70 @@
+name: "DVWA Security Testing"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:  # ✅ Allows manual execution from GitHub UI
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    services:
+      dvwa:
+        image: vulnerables/web-dvwa  # ✅ Runs DVWA inside GitHub Actions
+        ports:
+          - 8080:80  # ✅ Exposes DVWA on port 8080
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2  # ✅ Pulls your GitHub repo code
+
+      - name: Wait for DVWA to Start
+        run: sleep 30  # ✅ Ensures DVWA is fully running before scanning
+
+      - name: Run SonarCloud Scan (SAST)
+        uses: SonarSource/sonarqube-scan-action@v5.0.0  # ✅ Use latest version
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=dubeyshagun29
+            -Dsonar.projectKey=Dubeyshagun29_HCL_Demo
+            -Dsonar.sources=.
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.exclusions=**/obj/**,**/*.dll
+            -Dsonar.java.binaries=.
+
+
+      - name: Run HawkScan (StackHawk DAST)
+        uses: stackhawk/hawkscan-action@v2
+        continue-on-error: false  # ✅ Stops if the scan fails
+        with:
+          apiKey: ${{ secrets.HAWK_API_KEY }}
+          codeScanningAlerts: true
+
+          githubToken: ${{ github.token }}
+          configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
+      - name: Wait for StackHawk Report
+        run: sleep 240  # ⏳ Waits for 4 minutes (240 seconds)
+
+
+      #- name: Run OWASP ZAP Scan (DAST)
+        #uses: zaproxy/action-full-scan@v0.5.0
+        #with:
+          #target: "http://localhost:8080"  # ✅ Change this to match where DVWA is running
+          #docker_name: "mrlucasfreitas/zaproxy-full-scan:3.0"  # ✅ Correct OWASP ZAP image
+          #allow_issue_writing: false
+          #issue_title: "OWASP ZAP Scan Results"
+          
+
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: Security-Reports
+          path: ./.hawk/reports/

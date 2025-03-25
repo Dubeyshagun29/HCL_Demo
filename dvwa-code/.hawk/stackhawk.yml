@@ -1,0 +1,13 @@
+app:
+  applicationId: "2d2a98f9-63e8-4559-8526-3e2cd80f750d"  # ✅ Replace with your actual StackHawk App ID
+  host: "http://localhost:8080"  # ✅ Replace with your actual app URL
+  env: "DEVELOPMENT"  # ✅ Change based on environment
+
+hawk:
+  spider:
+    base: true
+    maxDurationMinutes: 5
+  startupTimeoutMinutes: 5
+  scan:
+    concurrentRequests: 20
+    throttlePassiveBacklog: 10000
