@@ -115,8 +115,8 @@ EOF
             https://api.github.com/repos/${{ github.repository }}/issues \
             -d "{\"title\": \"🔍 StackHawk CVE Report\", \"body\": $BODY}"
 
-      - name: Upload All Security Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: Security-Reports
-          path: reports/
+
+
+      - name: Extract CVEs from SAST & DAST
+  run: |
+    python3 extract_cve_reports.py
