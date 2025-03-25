@@ -15,7 +15,7 @@ permissions:
 jobs:
   security-tests:
     runs-on: ubuntu-latest
-codeScanningAlerts: true
+    
     services:
       dvwa:
         image: vulnerables/web-dvwa
@@ -42,7 +42,7 @@ codeScanningAlerts: true
       ######################
       - name: Run SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
-        codeScanningAlerts: true
+
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -67,7 +67,7 @@ codeScanningAlerts: true
       ########################
       - name: Run StackHawk scan
         uses: stackhawk/hawkscan-action@v2
-        codeScanningAlerts: true
+
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           githubToken: ${{ github.token }}
