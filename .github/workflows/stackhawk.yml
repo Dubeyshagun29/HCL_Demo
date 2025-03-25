@@ -1,31 +1,31 @@
-name: "Security Scans"
+#name: "Security Scans"
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:  # ✅ Allows manual execution
+#on:
+  #push:
+    #branches: [ "main" ]
+  #pull_request:
+    #branches: [ "main" ]
+  #workflow_dispatch:  # ✅ Allows manual execution
 
-permissions:
-  contents: read
+#permissions:
+  #contents: read
 
-jobs:
-  security-scans:
-    permissions:
-      contents: read
-      security-events: write
-    name: Security Scans
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4  # ✅ Ensures repo is pulled correctly
+#jobs:
+  #security-scans:
+    #permissions:
+      #contents: read
+      #security-events: write
+    #name: Security Scans
+    #runs-on: ubuntu-latest
+    #steps:
+      #- name: Checkout code
+        #uses: actions/checkout@v4  # ✅ Ensures repo is pulled correctly
 
-      - name: Run HawkScan (StackHawk DAST)
-        uses: stackhawk/hawkscan-action@v2
-        continue-on-error: false  # ✅ Stops if the scan fails
-        with:
-          apiKey: ${{ secrets.HAWK_API_KEY }}
-          codeScanningAlerts: true
-          githubToken: ${{ github.token }}
-          configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
+      #- name: Run HawkScan (StackHawk DAST)
+        #uses: stackhawk/hawkscan-action@v2
+        #continue-on-error: false  # ✅ Stops if the scan fails
+        #with:
+          #apiKey: ${{ secrets.HAWK_API_KEY }}
+          #codeScanningAlerts: true
+          #githubToken: ${{ github.token }}
+          #configurationFiles: ".hawk/stackhawk.yml"  # ✅ Correct path syntax
