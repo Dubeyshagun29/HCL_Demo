@@ -62,7 +62,7 @@ jobs:
             "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" \
             -o sonar_issues.json
 
-      ###################### DAST (StackHawk) ######################
+      ###################### DAST (StackHawk) #################
       - name: Run StackHawk scan
         uses: stackhawk/hawkscan-action@v2
         with:
