@@ -36,12 +36,12 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --sarif-file-output=dvwa-code/snyk.sarif --all-projects --file=index.php
+        args: --sarif-file-output=snyk.sarif 
 
     - name: ⤴️ Upload Snyk SARIF to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: dvwa-code/snyk.sarif
+        sarif_file: snyk.sarif
 
     - name: 🚀 Run ZAP Baseline Scan on DVWA
       uses: zaproxy/action-baseline@v0.10.0
