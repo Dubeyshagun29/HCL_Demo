@@ -1,29 +1,43 @@
 import json
 import os
+import subprocess
 
 # Ensure output directory exists
 os.makedirs("reports", exist_ok=True)
+
+def create_github_issue(title, body):
+    try:
+        subprocess.run([
+            "gh", "issue", "create",
+            "--title", title,
+            "--body", body
+        ], check=True)
+        print(f"✅ Created GitHub Issue: {title}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to create GitHub issue for {title}:", e)
 
 # === SAST: SonarCloud ===
 try:
     with open("sonar_issues.json", "r") as f:
         sonar_data = json.load(f)
 
-    sonar_vulns = []
-    for issue in sonar_data.get("issues", []):
-        cve_tags = [tag for tag in issue.get("tags", []) if tag.lower().startswith("cve-")]
-        if cve_tags:
-            sonar_vulns.append(
-                f"- **Rule**: {issue['rule']}\n  - **Component**: {issue['component']}\n  - **Severity**: {issue['severity']}\n  - **CVE Tags**: {', '.join(cve_tags)}"
+    issues = sonar_data.get("issues", [])
+    if issues:
+        report = "## 🛑 SonarCloud CVE Report\n\n"
+        for issue in issues:
+            cve_tags = [tag for tag in issue.get("tags", []) if tag.lower().startswith("cve-")]
+            if not cve_tags:
+                continue
+            report += (
+                f"### 🔹 Rule: `{issue['rule']}`\n"
+                f"- **Component**: `{issue['component']}`\n"
+                f"- **Severity**: `{issue['severity']}`\n"
+                f"- **CVE Tags**: {', '.join(cve_tags)}\n"
+                f"- **Link**: [View on SonarCloud](https://sonarcloud.io/project/issues?id=Dubeyshagun29_HCL_Demo&open={issue['key']})\n\n"
             )
-
-    with open("reports/sonarqube_cve_report.md", "w") as f:
-        if sonar_vulns:
-            f.write("## 🛑 SonarCloud CVE Report\n\n" + "\n\n".join(sonar_vulns))
-        else:
-            f.write("✅ No CVE-mapped vulnerabilities found in SAST (SonarCloud).")
-
-    print("✅ SonarCloud CVE report generated.")
+        create_github_issue("🛑 SonarCloud CVE Report", report)
+    else:
+        create_github_issue("🛑 SonarCloud CVE Report", "✅ No CVE-mapped vulnerabilities found in SAST (SonarCloud).")
 except Exception as e:
     print("⚠️ Failed to process SonarCloud report:", e)
 
@@ -32,20 +46,21 @@ try:
     with open("hawk/output/stackhawk-report.json", "r") as f:
         hawk_data = json.load(f)
 
-    hawk_vulns = []
-    for finding in hawk_data.get("findings", []):
-        cve_ids = finding.get("cve", [])
-        if cve_ids:
-            hawk_vulns.append(
-                f"- **ID**: {finding['id']}\n  - **Severity**: {finding['severity']}\n  - **Path**: {finding.get('path', 'N/A')}\n  - **CVE Tags**: {', '.join(cve_ids)}"
+    findings = hawk_data.get("findings", [])
+    if findings:
+        report = "## 🛡️ StackHawk CVE Report\n\n"
+        for finding in findings:
+            cve_ids = finding.get("cve", [])
+            if not cve_ids:
+                continue
+            report += (
+                f"### 🔸 ID: `{finding['id']}`\n"
+                f"- **Severity**: `{finding['severity']}`\n"
+                f"- **Path**: `{finding.get('path', 'N/A')}`\n"
+                f"- **CVE Tags**: {', '.join(cve_ids)}\n\n"
             )
-
-    with open("reports/stackhawk_cve_report.md", "w") as f:
-        if hawk_vulns:
-            f.write("## 🛡️ StackHawk CVE Report\n\n" + "\n\n".join(hawk_vulns))
-        else:
-            f.write("✅ No CVE-mapped vulnerabilities found in DAST (StackHawk).")
-
-    print("✅ StackHawk CVE report generated.")
+        create_github_issue("🛡️ StackHawk CVE Report", report)
+    else:
+        create_github_issue("🛡️ StackHawk CVE Report", "✅ No CVE-mapped vulnerabilities found in DAST (StackHawk).")
 except Exception as e:
     print("⚠️ Failed to process StackHawk report:", e)
