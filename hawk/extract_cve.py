@@ -29,7 +29,7 @@ except Exception as e:
 
 # === DAST: StackHawk ===
 try:
-    with open(".hawk/reports/report.json", "r") as f:
+    with open("hawk/output/stackhawk-report.json", "r") as f:
         hawk_data = json.load(f)
 
     hawk_vulns = []
