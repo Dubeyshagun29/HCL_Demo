@@ -35,7 +35,7 @@ jobs:
   ##############################
   # 2️⃣ SCA - Snyk
   ##############################
-  snyk:
+   snyk:
     name: 📦 Snyk Dependency Scan
     runs-on: ubuntu-latest
     steps:
@@ -66,7 +66,7 @@ jobs:
   ##############################
   # 3️⃣ DAST - ZAP Scan
   ##############################
-  zap_scan:
+   zap_scan:
     name: 🕷️ ZAP Baseline DAST Scan
     runs-on: ubuntu-latest
     services:
