@@ -11,9 +11,9 @@ hawk:
     concurrentRequests: 20
     throttlePassiveBacklog: 10000
 
-  #report:
-    #json: true
-    #outputDirectory: ".hawk/reports"
+report:
+  json: true
+  outputDirectory: "hawk/output"
 
 auth:
   loggedInIndicator: "Logout"
