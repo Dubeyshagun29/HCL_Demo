@@ -28,7 +28,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: bash -c "cd dvwa-code && snyk test --sarif-file-output=snyk.sarif --all-projects"
+          args: bash -c "cd dvwa-code && snyk test --sarif-file-output=snyk.sarif --all-projects --file=index.php"
 
       - name: Upload Snyk SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
