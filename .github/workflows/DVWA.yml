@@ -71,7 +71,7 @@ jobs:
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           githubToken: ${{ github.token }}
-          configurationFiles: ".hawk/stackhawk.yml"
+          configurationFiles: "hawk/stackhawk.yml"
 
       - name: Wait for StackHawk report
         run: sleep 30
@@ -80,7 +80,7 @@ jobs:
       # ✅ Run Python to extract CVEs
       ###############################
       - name: Run CVE Extraction Script
-        run: python3 .hawk/extract_cve.py
+        run: python3 hawk/extract_cve.py
 
       #########################################
       # ✅ Create GitHub Issues with CVE Reports
