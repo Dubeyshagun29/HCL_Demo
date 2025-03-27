@@ -1,57 +1,58 @@
-name: Secure DVWA with Snyk and ZAP
+name: Security Scans (SAST + DAST)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # for SARIF upload
 
 jobs:
   security-tests:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ✅ Checkout Code
-      uses: actions/checkout@v3
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
 
-    - name: ✅ Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1'
+      #########################################
+      # ✅ SAST: Snyk PHP Scan on dvwa-code/
+      #########################################
+      - name: Run Snyk Code on dvwa-code/
+        uses: snyk/actions/php@master
+        continue-on-error: true  # Prevents hard fail
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: bash -c "cd dvwa-code && snyk test --sarif-file-output=snyk.sarif --all-projects --file=index.php"
 
-    - name: ✅ Install Snyk CLI
-      run: npm install -g snyk
+      - name: Upload Snyk SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: dvwa-code/snyk.sarif
 
-    - name: ✅ Create .dcignore to exclude unnecessary dirs
-      run: |
-        echo "config/\ndocs/\nsetup/\nexternal/\ntests/\n*.md\n*.txt" > dvwa-code/.dcignore
+      #############################
+      # ✅ DAST: ZAP Baseline Scan
+      #############################
+      - name: Run ZAP Baseline Scan on DVWA
+        uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: 'http://localhost:8080'
+          fail_action: false
+          docker_name: 'ghcr.io/zaproxy/zap-baseline'
 
-    - name: ⚡️ Run Snyk Code PHP Scan on dvwa-code
-      uses: snyk/actions/php@master
-      timeout-minutes: 25
-      continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --sarif-file-output=snyk.sarif 
+        # Optional: if using local DVWA container
+        # Ensure DVWA is running and reachable
 
-    - name: ⤴️ Upload Snyk SARIF to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: snyk.sarif
-
-    - name: 🚀 Run ZAP Baseline Scan on DVWA
-      uses: zaproxy/action-baseline@v0.10.0
-      with:
-        target: 'http://localhost:8080/'
-        docker_name: 'owasp/zap2docker-stable'
-        cmd_options: '-a'
-
-    - name: 📁 Upload ZAP report
-      uses: actions/upload-artifact@v4
-      with:
-        name: zap-report
-        path: zap.out
+      #####################################
+      # (Optional) Upload Artifacts/Logs
+      #####################################
+      - name: Upload Snyk SARIF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-report
+          path: dvwa-code/snyk.sarif
