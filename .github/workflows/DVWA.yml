@@ -15,7 +15,7 @@ permissions:
 jobs:
   security-tests:
     runs-on: ubuntu-latest
-    
+
     services:
       dvwa:
         image: vulnerables/web-dvwa
@@ -37,37 +37,35 @@ jobs:
       - name: Wait for DVWA to start
         run: sleep 30
 
-      ######################
-      # ✅ SAST (SonarCloud)
-      ######################
+      ##########################
+      # ✅ Run SAST - SonarCloud
+      ##########################
       - name: Run SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
-
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.organization=dubeyshagun29
             -Dsonar.projectKey=Dubeyshagun29_HCL_Demo
-            -Dsonar.sources=.
+            -Dsonar.sources=dvwa-code
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.security.cwe.include=true
             -Dsonar.security.report.cve=true
 
-      - name: Download SonarCloud issues (for CVE extraction)
+      - name: Download SonarCloud issues
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           curl -s -u "${SONAR_TOKEN}:" \
-          "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" \
-          -o sonar_issues.json
+            "https://sonarcloud.io/api/issues/search?componentKeys=Dubeyshagun29_HCL_Demo&types=VULNERABILITY" \
+            -o sonar_issues.json
 
-      ########################
-      # ✅ DAST (StackHawk)
-      ########################
+      ############################
+      # ✅ Run DAST - StackHawk
+      ############################
       - name: Run StackHawk scan
         uses: stackhawk/hawkscan-action@v2
-
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           githubToken: ${{ github.token }}
@@ -76,37 +74,15 @@ jobs:
       - name: Wait for StackHawk report
         run: sleep 30
 
-      ###############################
-      # ✅ Run Python to extract CVEs
-      ###############################
-      - name: Run CVE Extraction Script
+      ##############################################
+      # ✅ Run Python script to extract + create issues
+      ##############################################
+      - name: Extract CVEs and create GitHub Issues
         run: python3 hawk/extract_cve.py
 
-      #########################################
-      # ✅ Create GitHub Issues with CVE Reports
-      #########################################
-      - name: Create GitHub Issue for SonarCloud CVEs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -f reports/sonarqube_cve_report.md ]; then
-            body=$(cat reports/sonarqube_cve_report.md)
-            gh api repos/${{ github.repository }}/issues \
-              -f title="🛑 SonarCloud CVE Report" \
-              -f body="$body"
-          fi
-
-      - name: Create GitHub Issue for StackHawk CVEs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -f reports/stackhawk_cve_report.md ]; then
-            body=$(cat reports/stackhawk_cve_report.md)
-            gh api repos/${{ github.repository }}/issues \
-              -f title="🛡️ StackHawk CVE Report" \
-              -f body="$body"
-          fi
-
+      #################################
+      # (Optional) Upload raw reports
+      #################################
       - name: Upload CVE reports as artifact
         uses: actions/upload-artifact@v4
         with:
