@@ -13,7 +13,7 @@ hawk:
 
 report:
   json: true
-  outputDirectory: "hawk/output"
+  outputDirectory: "./hawk/output"
 
 auth:
   loggedInIndicator: "Logout"
