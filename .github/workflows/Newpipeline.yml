@@ -16,7 +16,7 @@ jobs:
   ##############################
   # 1️⃣ SAST - CodeQL
   ##############################
-  codeql:
+   codeql:
     name: 🧠 CodeQL Analysis
     runs-on: ubuntu-latest
     steps:
@@ -26,10 +26,10 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: python
-          source-root: dvwa-code
+          languages: php
+          source-root: ./dvwa-code  # 👈 Ensure this points to your actual Python folder
 
-      - name: Run CodeQL
+      - name: Run CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
   ##############################
