@@ -79,6 +79,8 @@ jobs:
       ##############################################
       - name: Extract CVEs and create GitHub Issues
         run: python3 hawk/extract_cve.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #################################
       # (Optional) Upload raw reports
