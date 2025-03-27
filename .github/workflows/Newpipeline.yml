@@ -1,0 +1,91 @@
+name: 🔒 Security Pipeline (ZAP + Snyk + CodeQL)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  ##############################
+  # 1️⃣ SAST - CodeQL
+  ##############################
+  codeql:
+    name: 🧠 CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+          source-root: dvwa-code
+
+      - name: Run CodeQL
+        uses: github/codeql-action/analyze@v2
+
+  ##############################
+  # 2️⃣ SCA - Snyk
+  ##############################
+  snyk:
+    name: 📦 Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: |
+          pip install -r dvwa-code/requirements.txt || echo "No requirements.txt found"
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=dvwa-code/requirements.txt --sarif-file-output=snyk.sarif
+
+      - name: Upload Snyk SARIF report to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
+  ##############################
+  # 3️⃣ DAST - ZAP Scan
+  ##############################
+  zap_scan:
+    name: 🕷️ ZAP Baseline DAST Scan
+    runs-on: ubuntu-latest
+    services:
+      dvwa:
+        image: vulnerables/web-dvwa
+        ports:
+          - 8080:80
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Wait for DVWA to start
+        run: sleep 30
+
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: "http://localhost:8080"
+          fail_action: false
+          allow_issue_writing: true
+          issue_title: "ZAP Scan Baseline Report"
