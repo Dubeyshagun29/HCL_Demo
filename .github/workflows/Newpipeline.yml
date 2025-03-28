@@ -14,6 +14,7 @@ permissions:
 jobs:
   security-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # GitHub will stop the job if it exceeds this
 
     steps:
       - name: 📥 Checkout code
@@ -28,7 +29,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: bash -c "snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities --sarif-file-output=snyk.sarif"
+          args: bash -c "timeout 1200 snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities --sarif-file-output=snyk.sarif"
 
       - name: Upload Snyk SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
@@ -46,7 +47,7 @@ jobs:
           docker_name: 'ghcr.io/zaproxy/zap-baseline'
 
       #####################################
-      # (Optional) Upload Artifacts/Logs
+      # 📎 Upload SARIF Report as Artifact (Optional)
       #####################################
       - name: Upload Snyk SARIF as artifact
         uses: actions/upload-artifact@v4
