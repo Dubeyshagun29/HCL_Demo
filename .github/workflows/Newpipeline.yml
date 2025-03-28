@@ -9,7 +9,7 @@ on:
 
 permissions:
   contents: read
-  security-events: write  # for SARIF uploads
+  security-events: write
 
 jobs:
   security-tests:
@@ -19,17 +19,18 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
-      - name: 🛠 Install PHP (for Snyk to analyze)
+      - name: 🛠 Install PHP
         run: sudo apt-get update && sudo apt-get install -y php-cli
 
       - name: 🧪 Install Snyk CLI
         run: npm install -g snyk
 
-      - name: 🔍 Run Snyk on key DVWA files (max 20 mins)
+      - name: 🔍 Run Snyk on dvwa-code (20 min timeout)
         run: |
-          timeout 1200 snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities --sarif-file-output=snyk.sarif || true
-          if [ ! -s snyk.sarif ]; then
-            echo '{ "version": "2.1.0", "runs": [] }' > snyk.sarif
+          mkdir -p reports
+          timeout 1200 snyk test dvwa-code --sarif-file-output=reports/snyk.sarif || echo "Snyk scan completed (or timed out)."
+          if [ ! -s reports/snyk.sarif ]; then
+            echo '{ "version": "2.1.0", "runs": [] }' > reports/snyk.sarif
           fi
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -37,10 +38,10 @@ jobs:
       - name: 📤 Upload Snyk SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: snyk.sarif
+          sarif_file: reports/snyk.sarif
 
       - name: 📁 Upload Snyk SARIF as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: snyk-report
-          path: snyk.sarif
+          path: reports/snyk.sarif
