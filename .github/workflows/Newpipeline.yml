@@ -9,47 +9,43 @@ on:
 
 permissions:
   contents: read
-  security-events: write  # For SARIF uploads to GitHub code scanning
+  security-events: write
 
 jobs:
   security-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # GitHub will stop the job if it exceeds this
+    timeout-minutes: 30
 
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
-      #########################################
-      # ✅ SAST: Snyk PHP Scan on Key DVWA Files
-      #########################################
-      - name: Run Snyk Code on selected DVWA files
-        uses: snyk/actions/php@master
+      - name: 🛠️ Install PHP (for Snyk CLI to analyze)
+        run: sudo apt-get install php
+
+      - name: ⬇️ Install Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: 🧪 Run Snyk on key DVWA files (max 20 mins)
+        run: |
+          timeout 1200 snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities --sarif-file-output=snyk.sarif
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: bash -c "timeout 1200 snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities --sarif-file-output=snyk.sarif"
 
-      - name: Upload Snyk SARIF to GitHub Code Scanning
+      - name: 📤 Upload Snyk SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
 
-      ##################################
-      # ✅ DAST: ZAP Baseline Scan on DVWA
-      ##################################
-      - name: Run ZAP Baseline Scan on DVWA
+      - name: 🕷️ Run ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.7.0
         with:
           target: 'http://localhost:8080'
           fail_action: false
           docker_name: 'ghcr.io/zaproxy/zap-baseline'
 
-      #####################################
-      # 📎 Upload SARIF Report as Artifact (Optional)
-      #####################################
-      - name: Upload Snyk SARIF as artifact
+      - name: 📎 Upload Snyk SARIF as artifact
         uses: actions/upload-artifact@v4
         with:
           name: snyk-report
