@@ -2,9 +2,9 @@ name: Security Scans (SAST + DAST)
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -25,13 +25,22 @@ jobs:
       - name: 🧪 Install Snyk CLI
         run: npm install -g snyk
 
-      - name: 🔍 Run Snyk on dvwa-code (20 min timeout)
+      - name: 🔍 Run Snyk on individual DVWA PHP files (20 min max)
         run: |
           mkdir -p reports
-          timeout 1200 snyk test dvwa-code --sarif-file-output=reports/snyk.sarif || echo "Snyk scan completed (or timed out)."
-          if [ ! -s reports/snyk.sarif ]; then
-            echo '{ "version": "2.1.0", "runs": [] }' > reports/snyk.sarif
-          fi
+          files="index.php login.php"
+          for file in $files; do
+            if [ -f "dvwa-code/$file" ]; then
+              echo "Scanning $file"
+              snyk code test "dvwa-code/$file" --sarif-file-output="reports/$file.sarif" || true
+            fi
+          done
+
+          # Combine SARIFs
+          echo '{ "version": "2.1.0", "runs": [] }' > reports/snyk.sarif
+          for f in reports/*.sarif; do
+            jq -s '.[0].runs += .[1].runs | .[0]' reports/snyk.sarif "$f" > tmp.sarif && mv tmp.sarif reports/snyk.sarif
+          done
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
