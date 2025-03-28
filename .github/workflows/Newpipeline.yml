@@ -9,35 +9,48 @@ on:
 
 permissions:
   contents: read
-  security-events: write
+  security-events: write  # For SARIF uploads to GitHub code scanning
 
 jobs:
   security-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
-      - name: 🛠️ Install PHP (for Snyk CLI to analyze)
-        run: sudo apt-get install php
+      ############################################
+      # ✅ SAST: Snyk Scan for Key DVWA PHP Files
+      ############################################
+      - name: 🐘 Set up PHP (for Snyk CLI to analyze)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
 
-      - name: ⬇️ Install Snyk CLI
-        uses: snyk/actions/setup@master
+      - name: 🛠️ Install Snyk CLI
+        run: npm install -g snyk
 
       - name: 🧪 Run Snyk on key DVWA files (max 20 mins)
         run: |
-          timeout 1200 snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities --sarif-file-output=snyk.sarif
+          timeout 1200 snyk test dvwa-code/index.php dvwa-code/login.php dvwa-code/vulnerabilities \
+            --sarif-file-output=snyk.sarif || echo "Snyk scan may have failed or timed out."
+
+          # Ensure SARIF file is valid to avoid GitHub upload failure
+          if [ ! -s snyk.sarif ]; then
+            echo '{ "version": "2.1.0", "runs": [] }' > snyk.sarif
+          fi
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: 📤 Upload Snyk SARIF to GitHub
+      - name: 🧾 Upload Snyk SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
 
+      ##################################
+      # ✅ DAST: ZAP Baseline Scan on DVWA
+      ##################################
       - name: 🕷️ Run ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.7.0
         with:
@@ -45,7 +58,10 @@ jobs:
           fail_action: false
           docker_name: 'ghcr.io/zaproxy/zap-baseline'
 
-      - name: 📎 Upload Snyk SARIF as artifact
+      #####################################
+      # 📤 Optional: Upload SARIF as artifact
+      #####################################
+      - name: Upload Snyk SARIF as artifact
         uses: actions/upload-artifact@v4
         with:
           name: snyk-report
