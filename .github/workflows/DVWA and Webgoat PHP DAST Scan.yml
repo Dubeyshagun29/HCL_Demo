@@ -1,0 +1,64 @@
+name: "DAST Security Testing for DVWA and WebGoat-PHP"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  dast-scan:
+    runs-on: ubuntu-latest
+
+    services:
+      dvwa:
+        image: vulnerables/web-dvwa
+        ports:
+          - 8081:80
+
+      webgoat:
+        image: webgoat/webgoat-8.2
+        ports:
+          - 8082:8080
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Wait for DVWA and WebGoat to start
+        run: sleep 45  # Give containers enough time to be ready
+
+      ##############################################
+      # ZAP Scan: DVWA
+      ##############################################
+      - name: ZAP Scan on DVWA
+        run: |
+          docker run --rm -v $(pwd):/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://localhost:8081 \
+            -r zap-dvwa-report.html
+
+      ##############################################
+      # ZAP Scan: WebGoat-PHP
+      ##############################################
+      - name: ZAP Scan on WebGoat-PHP
+        run: |
+          docker run --rm -v $(pwd):/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://localhost:8082/WebGoat \
+            -r zap-webgoat-report.html
+
+      ##############################################
+      # Upload Reports
+      ##############################################
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZAP-Reports
+          path: |
+            zap-dvwa-report.html
+            zap-webgoat-report.html
