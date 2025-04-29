@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: data/
+Disallow: passwords/
+Disallow: config.inc
+Disallow: classes/
+Disallow: javascript/
+Disallow: documentation/
+Disallow: includes/
