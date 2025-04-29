@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP User Account Service Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 2rem;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        pre {
+            background-color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, "Courier New", monospace;
+        }
+        ul {
+            line-height: 1.8;
+        }
+        .note {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            margin: 1rem 0;
+            padding: 1rem;
+        }
+        a {
+            text-decoration: none;
+            color: #2980b9;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="soap-services.html">SOAP Services Home Page</a>
+    <h1>SOAP User Account Service Documentation</h1>
+    <p>This service provides operations to manage user accounts through a SOAP interface.</p>
+
+    <h2>Endpoint</h2>
+    <pre><code>POST /webservices/soap/ws-user-account.php</code></pre>
+
+    <h2>Methods</h2>
+
+    <h3>1. Get User (or Get All Users)</h3>
+    <p>Retrieves the account information for the specified user. Passing "*" as the username retrieves all users.</p>
+
+    <h4>Burp Repeater Request:</h4>
+    <pre><code>POST /webservices/soap/ws-user-account.php HTTP/1.1
+Host: mutillidae.localhost
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "urn:ws-user-account#getUser"
+Content-Length: 345
+
+&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:urn="urn:ws-user-account"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:getUser&gt;
+         &lt;username&gt;jeremy&lt;/username&gt;
+      &lt;/urn:getUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+
+    <h4>curl Command:</h4>
+    <pre><code>curl -X POST "http://mutillidae.localhost/webservices/soap/ws-user-account.php" \
+-H "Content-Type: text/xml; charset=utf-8" \
+-H "SOAPAction: \"urn:ws-user-account#getUser\"" \
+--data "&lt;soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' \
+xmlns:urn='urn:ws-user-account'&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:getUser&gt;
+         &lt;username&gt;jeremy&lt;/username&gt;
+      &lt;/urn:getUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;"
+</code></pre>
+
+    <h3>2. Register User</h3>
+    <p>Creates a new user account with the provided details.</p>
+
+    <h4>Burp Repeater Request:</h4>
+    <pre><code>POST /webservices/soap/ws-user-account.php HTTP/1.1
+Host: mutillidae.localhost
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "urn:ws-user-account#registerUser"
+Content-Length: 530
+
+&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:urn="urn:ws-user-account"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:registerUser&gt;
+         &lt;username&gt;Joe&lt;/username&gt;
+         &lt;password&gt;Holly&lt;/password&gt;
+         &lt;firstname&gt;Joe&lt;/firstname&gt;
+         &lt;lastname&gt;Holly&lt;/lastname&gt;
+         &lt;signature&gt;Try Harder&lt;/signature&gt;
+      &lt;/urn:registerUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+
+    <h4>curl Command:</h4>
+    <pre><code>curl -X POST "http://mutillidae.localhost/webservices/soap/ws-user-account.php" \
+-H "Content-Type: text/xml; charset=utf-8" \
+-H "SOAPAction: \"urn:ws-user-account#registerUser\"" \
+--data "&lt;soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' \
+xmlns:urn='urn:ws-user-account'&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:registerUser&gt;
+         &lt;username&gt;Joe&lt;/username&gt;
+         &lt;password&gt;Holly&lt;/password&gt;
+         &lt;firstname&gt;Joe&lt;/firstname&gt;
+         &lt;lastname&gt;Holly&lt;/lastname&gt;
+         &lt;signature&gt;Try Harder&lt;/signature&gt;
+      &lt;/urn:registerUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;"
+</code></pre>
+
+    <h3>3. Update User</h3>
+    <p>Updates an existing user account or creates a new one if it doesn’t exist.</p>
+
+    <h4>Burp Repeater Request:</h4>
+    <pre><code>POST /webservices/soap/ws-user-account.php HTTP/1.1
+Host: mutillidae.localhost
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "urn:ws-user-account#updateUser"
+Content-Length: 530
+
+&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:urn="urn:ws-user-account"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:updateUser&gt;
+         &lt;username&gt;Joe&lt;/username&gt;
+         &lt;password&gt;NewPass&lt;/password&gt;
+         &lt;firstname&gt;Joe&lt;/firstname&gt;
+         &lt;lastname&gt;Holly&lt;/lastname&gt;
+         &lt;signature&gt;Try Harder Updated&lt;/signature&gt;
+      &lt;/urn:updateUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+
+    <h4>curl Command:</h4>
+    <pre><code>curl -X POST "http://mutillidae.localhost/webservices/soap/ws-user-account.php" \
+-H "Content-Type: text/xml; charset=utf-8" \
+-H "SOAPAction: \"urn:ws-user-account#updateUser\"" \
+--data "&lt;soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' \
+xmlns:urn='urn:ws-user-account'&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:updateUser&gt;
+         &lt;username&gt;Joe&lt;/username&gt;
+         &lt;password&gt;NewPass&lt;/password&gt;
+         &lt;firstname&gt;Joe&lt;/firstname&gt;
+         &lt;lastname&gt;Holly&lt;/lastname&gt;
+         &lt;signature&gt;Try Harder Updated&lt;/signature&gt;
+      &lt;/urn:updateUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;"
+</code></pre>
+
+    <h3>4. Delete User</h3>
+    <p>Deletes an existing user account if it exists and is authenticated correctly.</p>
+
+    <h4>Burp Repeater Request:</h4>
+    <pre><code>POST /webservices/soap/ws-user-account.php HTTP/1.1
+Host: mutillidae.localhost
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "urn:ws-user-account#deleteUser"
+Content-Length: 345
+
+&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:urn="urn:ws-user-account"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:deleteUser&gt;
+         &lt;username&gt;joe&lt;/username&gt;
+         &lt;password&gt;holly&lt;/password&gt;
+      &lt;/urn:deleteUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+
+    <h4>curl Command:</h4>
+    <pre><code>curl -X POST "http://mutillidae.localhost/webservices/soap/ws-user-account.php" \
+-H "Content-Type: text/xml; charset=utf-8" \
+-H "SOAPAction: \"urn:ws-user-account#deleteUser\"" \
+--data "&lt;soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' \
+xmlns:urn='urn:ws-user-account'&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;urn:deleteUser&gt;
+         &lt;username&gt;joe&lt;/username&gt;
+         &lt;password&gt;holly&lt;/password&gt;
+      &lt;/urn:deleteUser&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;"
+</code></pre>
+</body>
+</html>
