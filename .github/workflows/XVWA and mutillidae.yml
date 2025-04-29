@@ -1,0 +1,93 @@
+name: "DVWA Security Testing"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+
+    #services:
+     # dvwa:
+      #  image: vulnerables/web-dvwa
+       # ports:
+        #  - 8080:80
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Create reports folder
+        run: mkdir -p reports
+
+     # - name: Wait for DVWA to start
+        #run: sleep 30
+
+      ###################### SAST - XVWA ######################
+      - name: Run SonarCloud scan on XVWA
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=dubeyshagun29
+            -Dsonar.projectKey=Dubeyshagun29_XVWA
+            -Dsonar.sources=XVWA
+            -Dsonar.host.url=https://sonarcloud.io
+
+      ###################### SAST - Mutillidae ######################
+      - name: Run SonarCloud scan on Mutillidae
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=dubeyshagun29
+            -Dsonar.projectKey=Dubeyshagun29_Mutillidae
+            -Dsonar.sources=Mutillidae
+            -Dsonar.host.url=https://sonarcloud.io
+
+      ###################### DAST (StackHawk) #################
+      #- name: Run StackHawk scan
+       # uses: stackhawk/hawkscan-action@v2
+        #with:
+         # apiKey: ${{ secrets.HAWK_API_KEY }}
+          #githubToken: ${{ github.token }}
+          #configurationFiles: "hawk/stackhawk.yml"
+
+      #- name: Wait for StackHawk report
+       # run: sleep 30
+
+      ##########################################
+      # Extract CVEs and Create GitHub Issues
+      ##########################################
+      - name: Extract CVEs and create GitHub Issues
+        run: python3 hawk/extract_cve.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      ##########################################
+      # Upload CVE markdowns as artifacts
+      ##########################################
+      - name: Upload CVE reports as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CVE-Reports
+          path: reports/
