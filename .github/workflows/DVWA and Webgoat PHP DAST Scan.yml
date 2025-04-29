@@ -21,7 +21,7 @@ jobs:
           - 8081:80
 
       webgoat:
-        image: webgoat/webgoat-8.2
+        image: webgoat/webgoat
         ports:
           - 8082:8080
 
