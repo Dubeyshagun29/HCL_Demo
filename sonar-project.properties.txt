@@ -1,12 +1,18 @@
-plugins {
-  id "org.sonarqube" version "3.4.0.2513"
-}
+sonar.projectKey=Dubeyshagun29_HCL_Demo
+sonar.organization=dubeyshagun29
+sonar.host.url=https://sonarcloud.io
+sonar.sources=.
 
-sonarqube {
-  properties {
-    property "sonar.projectKey", "Dubeyshagun29_HCL_Demo"
-    property "sonar.organization", "dubeyshagun29"
-    property "sonar.host.url", "https://sonarcloud.io"
-    property "sonar.sources", "."
-  }
-}
+sonar.modules=XVWA,Mutillidae
+
+XVWA.sonar.projectBaseDir=XVWA
+XVWA.sonar.sources=.
+XVWA.sonar.language=php
+XVWA.sonar.exclusions=**/tests/**
+
+Mutillidae.sonar.projectBaseDir=Mutillidae
+Mutillidae.sonar.sources=.
+Mutillidae.sonar.language=php
+Mutillidae.sonar.exclusions=**/tests/**
+
+sonar.exclusions=DVWA/**,WebGoat-php/**,dvwa-code/**
