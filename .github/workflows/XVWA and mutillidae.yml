@@ -1,4 +1,4 @@
-name: "DVWA Security Testing"
+name: "SAST Security Testing for XVWA and Mutillidae II"
 
 on:
   push:
@@ -16,12 +16,6 @@ jobs:
   security-tests:
     runs-on: ubuntu-latest
 
-    #services:
-     # dvwa:
-      #  image: vulnerables/web-dvwa
-       # ports:
-        #  - 8080:80
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -36,9 +30,6 @@ jobs:
 
       - name: Create reports folder
         run: mkdir -p reports
-
-     # - name: Wait for DVWA to start
-        #run: sleep 30
 
       ###################### SAST - XVWA ######################
       - name: Run SonarCloud scan on XVWA
@@ -63,31 +54,3 @@ jobs:
             -Dsonar.projectKey=Dubeyshagun29_Mutillidae
             -Dsonar.sources=Mutillidae
             -Dsonar.host.url=https://sonarcloud.io
-
-      ###################### DAST (StackHawk) #################
-      #- name: Run StackHawk scan
-       # uses: stackhawk/hawkscan-action@v2
-        #with:
-         # apiKey: ${{ secrets.HAWK_API_KEY }}
-          #githubToken: ${{ github.token }}
-          #configurationFiles: "hawk/stackhawk.yml"
-
-      #- name: Wait for StackHawk report
-       # run: sleep 30
-
-      ##########################################
-      # Extract CVEs and Create GitHub Issues
-      ##########################################
-      - name: Extract CVEs and create GitHub Issues
-        run: python3 hawk/extract_cve.py
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      ##########################################
-      # Upload CVE markdowns as artifacts
-      ##########################################
-      - name: Upload CVE reports as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: CVE-Reports
-          path: reports/
